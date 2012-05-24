@@ -1,15 +1,15 @@
 
 var bcrypt = require('bcrypt'),
-	random = require('util/random'),
+	random = require('matterhorn-standard').random,
 	_ = require('underscorem'),
 	sys = require('sys');
 	
 function hashPassword(password, salt){
-	var hash = bcrypt.hashpw(password, salt);
+	var hash = bcrypt.hashSync(password, salt);
 	return hash;
 }
 
-function make(userApplicationName, cb, useMonosy){
+function make(userApplicationName, cb){
 
 	if(arguments.length === 1){
 		cb = arguments[0];
@@ -21,31 +21,18 @@ function make(userApplicationName, cb, useMonosy){
 	_.assertString(userApplicationName);
 	_.assertFunction(cb);
 	
-	if(useMonosy){
-	
-		require('monosy').make(userApplicationName, function(monosyClient){
+	require('jsonds').make('jsonds_user', 1000, function(jsonds){
 
-			require('monosy-iav').make(monosyClient, 'user-info', function(iav){
-
-				require('monosy-sav').make(monosyClient, 'user-lookups', function(sav){
-					require('monosy-counter').make(monosyClient, 'next-user-id', function(counter){
-						finishMake(iav, sav, counter, cb);
-					});
+		var jsondsMonosy = require('jsonds-monosy');
+		
+		jsondsMonosy.iav(jsonds.root, 'user-info', function(iav){
+			jsondsMonosy.sav(jsonds.root, 'user-lookups', function(sav){
+				jsondsMonosy.counter(jsonds.root, 'next-user-id', function(counter){
+					finishMake(iav, sav, counter, cb);
 				});
 			});
 		});
-	}else{
-		require('jsonds').make('jsonds_user', 1000, function(jsonds){
-
-			require('jsonds-iav').make(jsonds.root, 'user-info', function(iav){
-				require('jsonds-sav').make(jsonds.root, 'user-lookups', function(sav){
-					require('jsonds-counter').make(jsonds.root, 'next-user-id', function(counter){
-						finishMake(iav, sav, counter, cb);
-					});
-				});
-			});
-		});		
-	}
+	});		
 }
 
 function finishMake(i, s, userIdCounter, cb){
@@ -69,6 +56,28 @@ function finishMake(i, s, userIdCounter, cb){
 				cb(id);
 			});
 		},
+		createAuthenticationKey: function(email, cb){
+			s.getString(email, 'authenticationKey', function(uid){
+				if(uid !== undefined){
+					s.del(uid, 'authenticationKey');
+					console.log('deleting old authentication key');
+				}
+				
+				var newUid = random.uid();
+				s.setString(newUid, 'authenticationKey', email);
+				s.setString(email, 'authenticationKey', newUid);
+				cb(newUid);
+			});
+		},
+		getAuthenticationKeyEmail: function(key, cb){
+			s.getString(key, 'authenticationKey', cb);
+		},
+		expireAuthenticationKey: function(key){
+			s.getString(key, 'authenticationKey', function(email){
+				s.del(email, 'authenticationKey');
+				s.del(key, 'authenticationKey');
+			})			
+		},
 		setEmail: function(id, email){
 			s.setInt(email, 'lookup-by-email', id);
 
@@ -80,7 +89,7 @@ function finishMake(i, s, userIdCounter, cb){
 		},
 		setPassword: function(id, password){
 
-			var salt = bcrypt.gen_salt(10);  
+			var salt = bcrypt.genSaltSync(10);  
 
 			i.setString(id, 'salt', 'BCRYPT');
 			i.setString(id, 'password-hash', hashPassword(password, salt));
@@ -95,7 +104,7 @@ function finishMake(i, s, userIdCounter, cb){
 
 				var passed;
 				if(salt === 'BCRYPT'){
-					passed = bcrypt.compare(password, hash);
+					passed = bcrypt.compareSync(password, hash);
 				}else{
 					//TODO - also make sure to auto-upgrade here
 					throw 'TODO - support legacy password hashes: ' + salt;
@@ -129,6 +138,7 @@ function finishMake(i, s, userIdCounter, cb){
 		},
 		clearSession: function(session){
 			s.del(session, 'sessions');
+			console.log('clearing user session');
 		}
 	};
 	

@@ -1,15 +1,14 @@
 {
 	"name": "matterhorn-user",
-	"version": "0.1",
+	"version": "0.2.0",
 	"description": "User management for the matterhorn framework.",
+	"author": "Liam Doherty",
 	"main": "user",
 	"dependencies" : { 
-		"matterhorn-ajax": ">=0.1",
-		"matterhorn-jquery": ">=0.1",
-		"monosy-iav" : ">=0.1", 
-		"monosy-sav" : ">=0.1", 
-		"jsonds-iav" : ">=0.1", 
-		"jsonds-sav" : ">=0.1", 
-		"bcrypt": ">=0.1.2"
+		"underscorem": ">=0.1",
+		"matterhorn-standard": ">=0.1",
+		"jsonds": ">=0.1",
+		"bcrypt": ">=0.1.2",
+		"mailer": ">=0.1"
 	}
 }

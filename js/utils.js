@@ -7,13 +7,20 @@ function getParameterByName(name) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 
 }
+exports.getParameterByName = getParameterByName
 
-function makeCookie(cookie){
+var OneMonth = 1000*60*60*24*30
 
+function makeCookie(token, userId){
+	
 	var loc = document.location;
 
 	var domainStr = (loc.hostname === 'localhost' ? '' : '; domain=' + loc.hostname);
-	var newCookie = cookie + domainStr;
+	var newCookie = token + '|'+userId + domainStr;
 
-	document.cookie = 'SID='+newCookie;
+	newCookie += '; Expires='+new Date(Date.now()+OneMonth).toUTCString();
+	newCookie = 'SID='+newCookie;
+	console.log('set cookie: ' + newCookie)
+	document.cookie = newCookie
 }
+exports.makeCookie = makeCookie

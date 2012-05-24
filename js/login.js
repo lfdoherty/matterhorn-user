@@ -1,22 +1,29 @@
 
-$(document).ready(function(){
+require('matterhorn-standard/js/jquery')
+var u = require('./utils')
 
-	$("#submit").click(function(){
+var pollsave = require('matterhorn-standard/js/pollsave').pollsave
+
+jQuery(document).ready(function(){
+
+	jQuery("#submit").click(function(){
 		
-		var email = $("#email").val();
-		var password = $("#password").val();
+		var email = jQuery("#email").val();
+		var password = jQuery("#password").val();
 
 		var json = {email: email, password: password};
 
-		function ok(cookie){
+		function ok(res){
 
 			var loc = window.location;
+			
+			res = JSON.parse(res)
 
-			makeCookie(cookie);
+			u.makeCookie(res.token, res.userId);
 			
-			$("#result").append("Login Successful");
+			jQuery("#result").append("Login Successful");
 			
-			window.location = 'http://' + window.location.host + afterLoginUrl;
+			window.location = 'http://' + window.location.host + after;
 		}
 
 		function fail(){
@@ -26,10 +33,10 @@ $(document).ready(function(){
 		pollsave(json, '/ajax/login', 200, ok, fail);
 	});
 	
-	var next = getParameterByName('next');
+	var next = u.getParameterByName('next');
 
 	if(next){
-		var signup = $('#signuplink');
+		var signup = jQuery('#signuplink');
 		signup.attr('href', signup.attr('href')+'?next='+next);
 	}
 });
