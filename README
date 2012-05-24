@@ -6,5 +6,4 @@ Right now, this software is undocumented and somewhat untested.
 
 *****
 
-This package implements user creation, storage, and authentication, by default using jsonds, or alternatively the
-monosy data store.
+This package implements user creation, storage, and authentication, using jsonds.
