@@ -2,7 +2,7 @@
 require('matterhorn-standard/js/jquery')
 var u = require('./utils')
 
-var pollsave = require('matterhorn-standard/js/pollsave').pollsave
+var pollsave = require('matterhorn-standard/js/pollsave')//.pollsave
 
 jQuery(document).ready(function(){
 
